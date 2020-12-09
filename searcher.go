@@ -32,3 +32,23 @@ func (v Searcher) Node(fnc dst.Node)(dst.Node,error){
 	return nil,nil
 
 }
+
+
+func (v Searcher) Replace(targetNode,replaceNode dst.Node)(dst.Node,error){
+	fn := func(c *dstutil.Cursor)bool{
+		if sim, hit := c.Similarity(targetNode); sim >0 &&sim==hit {
+			c.Replace(replaceNode)
+			return true
+		}else{
+			return false
+		}
+	}
+
+	newNode,_ := dstutil.Rewrite(v.ast.DstNode, fn)
+
+	if newNode != nil{
+		return newNode,nil
+	}
+	return nil,nil
+
+}
