@@ -2,10 +2,11 @@ package blueAst
 
 import (
 	"github.com/JfL0unch/dst"
+	"go/token"
 	"testing"
 )
 
-func TestSearcher_FuncDecl(t *testing.T) {
+func TestSearcher_Node(t *testing.T) {
 
 	input := `package blueAst
 
@@ -22,14 +23,13 @@ type Ast struct {
 	DstNode  *dst.File      // dst.Node
 }
 
-
 func NewAst() *Ast{
 	// todo
 	return &Ast{}
 }`
-	targetName := "NewAst"
+	targetName := "Ast"
 
-	expected := "NewAst"
+	expected := "Ast"
 
 	ast,err := NewAst("",input)
 	if err != nil{
@@ -43,39 +43,36 @@ func NewAst() *Ast{
 		return
 	}
 
-
-	params := make([]*dst.Field,0)
-	params = append(params,&dst.Field{
-		Type: &dst.StarExpr{
-			X: &dst.Ident{Name: "Ast" },
-		},
-	})
-	fieldListParams := &dst.FieldList{
-		List: params,
-	}
-
-	fnc := dst.FuncDecl{
-		Name:&dst.Ident{
+	specs := make([]dst.Spec,0)
+	specs = append(specs,&dst.TypeSpec{
+		Name: &dst.Ident{
 			Name: targetName,
 		},
-		Type: &dst.FuncType{
-			Params: fieldListParams,
-		},
+		Type: &dst.StructType{},
+	})
+
+	fnc := dst.GenDecl{
+		Tok:token.TYPE,
+		Specs: specs,
 	}
-	funcDecl,err := searcher.FuncDecl(fnc)
+
+	node,err := searcher.Node(&fnc)
 	if err !=nil {
 		t.Error(err)
 		return
 	}
 
-	got := ""
-	if funcDecl != nil&& funcDecl.Name !=nil{
-		got = funcDecl.Name.Name
-	}
+	if genDecl,ok := node.(*dst.GenDecl);ok{
+		got := ""
+		if genDecl != nil&& len(genDecl.Specs) > 0{
+			got = genDecl.Specs[0].(*dst.TypeSpec).Name.Name
+		}
 
-
-	if got != expected {
-		t.Errorf("got %s,expect %s",got,expected)
+		if got != expected {
+			t.Errorf("got %s,expect %s",got,expected)
+		}
+	}else{
+		t.Errorf("got %s,expect %s","",expected)
 	}
 
 }

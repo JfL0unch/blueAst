@@ -28,11 +28,11 @@ func NewAst(fileName string,src string) (*Ast,error){
 		return nil,err
 	}
 
-	ast := &Ast{
+	a := &Ast{
 		FileSet: fset,
 		AstNode: f,
 		DstNode: d,
 	}
 
-	return ast,nil
+	return a,nil
 }
