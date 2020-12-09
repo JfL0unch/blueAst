@@ -2,14 +2,37 @@ package blueAst
 
 import (
 	"go/ast"
+	"go/parser"
 	"go/token"
 
-	"github.com/dave/dst"
+	"github.com/JfL0unch/dst"
+	"github.com/JfL0unch/dst/decorator"
 )
 
 type Ast struct {
-	Searcher Searcher
 	FileSet  *token.FileSet // file info
 	AstNode  *ast.File      // ast.Node
-	Dst      *dst.File      // dst.Node
+	DstNode  *dst.File      // dst.Node
+}
+
+func NewAst(fileName string,src string) (*Ast,error){
+
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, fileName, src, parser.ParseComments)
+	if err != nil {
+		return nil,err
+	}
+
+	d, err := decorator.DecorateFile(fset, f)
+	if err != nil {
+		return nil,err
+	}
+
+	ast := &Ast{
+		FileSet: fset,
+		AstNode: f,
+		DstNode: d,
+	}
+
+	return ast,nil
 }
