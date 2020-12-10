@@ -128,12 +128,7 @@ func NewAstCase1() *Ast{
 		Tok: token.DEFINE,
 	})
 
-	stmts = append(stmts,&dst.EmptyStmt{
-		Decs: dst.EmptyStmtDecorations{
-			NodeDecs:dst.NodeDecs{
-				End: []string{"\n"},
-			},
-		},})
+	stmts = append(stmts,newlineStmt(1))
 
 	results := make([]dst.Expr,0)
 	results = append(results,&dst.Ident{
@@ -159,7 +154,7 @@ func NewAstCase1() *Ast{
 		},
 	})
 
-	targetNode := &dst.FuncDecl{
+	replacingNode := &dst.FuncDecl{
 		Name: &dst.Ident{
 			Name: "NewAstCase1",
 		},
@@ -170,7 +165,7 @@ func NewAstCase1() *Ast{
 		},
 	}
 
-	replaceNode := &dst.FuncDecl{
+	targetNode := &dst.FuncDecl{
 		Name: &dst.Ident{
 			Name: "NewAst",
 		},
@@ -196,7 +191,7 @@ func NewAstCase1() *Ast{
 		return
 	}
 
-	newNode,err := searcher.Replace(targetNode,replaceNode)
+	newNode,err := searcher.Replace(replacingNode,targetNode)
 	if err !=nil {
 		t.Error(err)
 		return

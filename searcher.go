@@ -52,3 +52,23 @@ func (v Searcher) Replace(targetNode,replaceNode dst.Node)(dst.Node,error){
 	return nil,nil
 
 }
+
+func newlineStmt(lineNum int) dst.Stmt{
+	newline := &dst.EmptyStmt{
+		Implicit: true,
+		Decs: dst.EmptyStmtDecorations{
+			NodeDecs:dst.NodeDecs{
+				End: []string{},
+			},
+		}}
+	if lineNum >0 {
+
+		lines := make([]string,0)
+		for i:=0;i<lineNum;i++{
+			lines = append(lines,"\n")
+		}
+		newline.Decs.NodeDecs.End = lines
+	}
+
+	return newline
+}
