@@ -216,5 +216,149 @@ func NewAstCase1() *Ast{
 		t.Errorf("got %s,expect %s","",expected)
 	}
 
+}
+
+
+func TestSearcher_InsertBefore(t *testing.T) {
+	input := `package blueAst
+
+import (
+	"go/ast"
+	"go/token"
+
+	"github.com/JfL0unch/dst"
+)
+
+
+type Ast struct {
+	FileSet  *token.FileSet // file info
+	AstNode  *ast.File      // ast.Node
+	DstNode  *dst.File      // dst.Node
+}
+
+
+
+
+func (a *Order) Create(c *gin.Context) {
+
+	type B struct {
+	}
+
+
+	// 请求参数解析
+	var req schema.OrderCreateParam
+	if err := c.BindJSON(&req); err != nil {
+		RepJson(c, errors.New(util.Translate(err)), nil)
+		return
+	}
+	// 请求添加参数校验
+	if err := req.AddCheck(); err != nil {
+		RepError(c, err)
+		return
+	}
+	// 对请求数据校验
+	if err := req.DataCheck(); err != nil {
+		RepError(c, err)
+		return
+	}
+
+	item, err := a.OrderService.Create(c, &req)
+	// 返回结果
+	RepJson(c, err, item)
+}`
+
+	//fieldList := make([]*dst.Field,0)
+	//fieldList = append(fieldList,&dst.Field{
+	//	Type:&dst.StarExpr{
+	//		X: &dst.SelectorExpr{
+	//			X: &dst.Ident{Name:"gin"},
+	//			Sel: &dst.Ident{Name:"Context"},
+	//		},
+	//	},
+	//	Names: []*dst.Ident{{Name:"c"}},
+	//})
+	//
+	//
+	//recvParams := make([]*dst.Field,0)
+	//recvParams = append(recvParams,&dst.Field{
+	//	Names: []*dst.Ident{{Name:"a"}},
+	//	Type: &dst.StarExpr{
+	//		X: &dst.Ident{Name:"Order"},
+	//	},
+	//})
+	//recv := &dst.FieldList{
+	//	List: recvParams,
+	//}
+	//insertingNode := &dst.FuncDecl{
+	//	Recv: recv,
+	//	Name: &dst.Ident{
+	//		Name: "Create",
+	//	},
+	//	Type: &dst.FuncType{
+	//		Params: &dst.FieldList{
+	//			List: fieldList,
+	//		},
+	//	},
+	//}
+
+	insertingSpecs := make([]dst.Spec,0)
+	insertingSpecs = append(insertingSpecs,&dst.TypeSpec{
+			Name: &dst.Ident{Name:"B"},
+			Type: &dst.StructType{},
+	})
+	insertingNode := &dst.GenDecl{
+		Specs: insertingSpecs,
+		Tok: token.TYPE,
+	}
+
+	targetSpecs := make([]dst.Spec,0)
+	targetSpecs = append(targetSpecs,&dst.TypeSpec{
+		Name: &dst.Ident{Name:"A"},
+		Type: &dst.StructType{},
+	})
+	targetNode := &dst.GenDecl{
+		Specs: targetSpecs,
+		Tok: token.TYPE,
+	}
+
+	expected := ""
+
+	ast,err := NewAst("",input)
+	if err != nil{
+		t.Error(err)
+		return
+	}
+
+	searcher,err := NewSearcher(*ast)
+	if err != nil{
+		t.Error(err)
+		return
+	}
+
+	newNode,err := searcher.InsertBefore(insertingNode,targetNode)
+	if err !=nil {
+		t.Error(err)
+		return
+	}
+
+	if dstFile,ok := newNode.(*dst.File);ok{
+		restoredFset, restoredFile, err := decorator.RestoreFile(dstFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var buf bytes.Buffer
+		if err := format.Node(&buf, restoredFset, restoredFile); err != nil {
+			t.Fatal(err)
+		}
+
+		got := buf.String()
+
+		if got != expected {
+			t.Errorf("got %s,expect %s",got,expected)
+		}
+	}else{
+		t.Errorf("got %s,expect %s","",expected)
+	}
+
 
 }

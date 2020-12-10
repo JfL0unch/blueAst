@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/JfL0unch/dst"
 	"github.com/JfL0unch/dst/dstutil"
+	"runtime"
 )
 
 type Searcher struct {
@@ -38,6 +39,55 @@ func (v Searcher) Replace(targetNode,replaceNode dst.Node)(dst.Node,error){
 	fn := func(c *dstutil.Cursor)bool{
 		if sim, hit := c.Similarity(targetNode); sim >0 &&sim==hit {
 			c.Replace(replaceNode)
+			return true
+		}else{
+			return false
+		}
+	}
+
+	root,_ := dstutil.Rewrite(v.ast.DstNode, fn)
+
+	if root != nil{
+		return root,nil
+	}
+	return nil,nil
+
+}
+
+
+func (v Searcher) InsertBefore(insertingNode,targetNode dst.Node)(dst.Node,error){
+	defer func(){
+		if rec:=recover();rec!=nil{
+			var buf []byte
+			runtime.Stack(buf,false)
+			fmt.Printf("%s",buf)
+		}
+	}()
+
+	fn := func(c *dstutil.Cursor)bool{
+		if sim, hit := c.Similarity(insertingNode); sim >0 &&sim==hit {
+			c.InsertBefore(targetNode)
+			return true
+		}else{
+			return false
+		}
+	}
+
+	root,_ := dstutil.Rewrite(v.ast.DstNode, fn)
+
+	if root != nil{
+		return root,nil
+	}
+
+	return nil,nil
+
+}
+
+
+func (v Searcher) InsertAfter(targetNode,replaceNode dst.Node)(dst.Node,error){
+	fn := func(c *dstutil.Cursor)bool{
+		if sim, hit := c.Similarity(targetNode); sim >0 &&sim==hit {
+			c.InsertAfter(replaceNode)
 			return true
 		}else{
 			return false
