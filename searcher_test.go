@@ -267,44 +267,14 @@ func (a *Order) Create(c *gin.Context) {
 	RepJson(c, err, item)
 }`
 
-	//fieldList := make([]*dst.Field,0)
-	//fieldList = append(fieldList,&dst.Field{
-	//	Type:&dst.StarExpr{
-	//		X: &dst.SelectorExpr{
-	//			X: &dst.Ident{Name:"gin"},
-	//			Sel: &dst.Ident{Name:"Context"},
-	//		},
-	//	},
-	//	Names: []*dst.Ident{{Name:"c"}},
-	//})
-	//
-	//
-	//recvParams := make([]*dst.Field,0)
-	//recvParams = append(recvParams,&dst.Field{
-	//	Names: []*dst.Ident{{Name:"a"}},
-	//	Type: &dst.StarExpr{
-	//		X: &dst.Ident{Name:"Order"},
-	//	},
-	//})
-	//recv := &dst.FieldList{
-	//	List: recvParams,
-	//}
-	//insertingNode := &dst.FuncDecl{
-	//	Recv: recv,
-	//	Name: &dst.Ident{
-	//		Name: "Create",
-	//	},
-	//	Type: &dst.FuncType{
-	//		Params: &dst.FieldList{
-	//			List: fieldList,
-	//		},
-	//	},
-	//}
-
 	insertingSpecs := make([]dst.Spec,0)
 	insertingSpecs = append(insertingSpecs,&dst.TypeSpec{
 			Name: &dst.Ident{Name:"B"},
-			Type: &dst.StructType{},
+			Type: &dst.StructType{
+				Fields: &dst.FieldList{
+					List: []*dst.Field{},
+				},
+			},
 	})
 	insertingNode := &dst.GenDecl{
 		Specs: insertingSpecs,
@@ -314,7 +284,12 @@ func (a *Order) Create(c *gin.Context) {
 	targetSpecs := make([]dst.Spec,0)
 	targetSpecs = append(targetSpecs,&dst.TypeSpec{
 		Name: &dst.Ident{Name:"A"},
-		Type: &dst.StructType{},
+		Type: &dst.StructType{
+			Fields:&dst.FieldList{
+				List: []*dst.Field{},
+			},
+
+		},
 	})
 	targetNode := &dst.GenDecl{
 		Specs: targetSpecs,
@@ -340,7 +315,6 @@ func (a *Order) Create(c *gin.Context) {
 		t.Error(err)
 		return
 	}
-
 	if dstFile,ok := newNode.(*dst.File);ok{
 		restoredFset, restoredFile, err := decorator.RestoreFile(dstFile)
 		if err != nil {

@@ -65,20 +65,27 @@ func (v Searcher) InsertBefore(insertingNode,targetNode dst.Node)(dst.Node,error
 	}()
 
 	fn := func(c *dstutil.Cursor)bool{
-		if sim, hit := c.Similarity(insertingNode); sim >0 &&sim==hit {
-			c.InsertBefore(targetNode)
+		if sim, hit := c.Similarity(insertingNode); sim>0&&hit>0&&sim==hit {
+			fmt.Printf("sim %d,hit %d,cindex %d,%s",sim,hit,c.Index(),c.Name())
+			if c.Index() >=0 {
+				c.InsertBefore(targetNode)
+				fmt.Printf("zzzz==")
+			}
+			fmt.Printf("yyyy==")
 			return true
 		}else{
 			return false
 		}
 	}
 
-	root,_ := dstutil.Rewrite(v.ast.DstNode, fn)
+	root,found := dstutil.Rewrite(v.ast.DstNode, fn)
 
-	if root != nil{
+	if found {
+		fmt.Printf("xxx==")
 		return root,nil
 	}
 
+	fmt.Printf("yyy==")
 	return nil,nil
 
 }
